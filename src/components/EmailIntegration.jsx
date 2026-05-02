@@ -30,12 +30,29 @@ export default function EmailIntegration({ onApplicationsDetected }) {
   const handleConnect = async () => {
     try {
       setError(null)
+      console.log('Attempting to connect to Gmail...')
       await signInToGmail()
       setIsConnected(true)
       alert('Gmail connected successfully!')
     } catch (err) {
       console.error('Gmail connection error:', err)
-      setError('Failed to connect to Gmail. Please try again.')
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to connect to Gmail. '
+      
+      if (err.message && err.message.includes('Client ID')) {
+        errorMessage += 'Gmail Client ID is not configured. Check your .env file.'
+      } else if (err.message && err.message.includes('popup')) {
+        errorMessage += 'Popup was blocked. Please allow popups for this site.'
+      } else if (err.error === 'popup_closed_by_user') {
+        errorMessage += 'Sign-in popup was closed. Please try again.'
+      } else if (err.error === 'access_denied') {
+        errorMessage += 'Access was denied. Please grant the required permissions.'
+      } else {
+        errorMessage += err.message || 'Please check the browser console for details.'
+      }
+      
+      setError(errorMessage)
     }
   }
 

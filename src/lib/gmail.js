@@ -3,6 +3,11 @@
 const GMAIL_CLIENT_ID = import.meta.env.VITE_GMAIL_CLIENT_ID
 const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify'
 
+// Debug logging
+const debugLog = (message, data) => {
+  console.log(`[Gmail Integration] ${message}`, data || '')
+}
+
 // Email detection patterns
 export const emailPatterns = {
   application: {
@@ -65,26 +70,55 @@ export const emailPatterns = {
 // Initialize Gmail API
 export const initGmailClient = () => {
   return new Promise((resolve, reject) => {
+    debugLog('Initializing Gmail client...')
+    
     if (!GMAIL_CLIENT_ID) {
-      reject(new Error('Gmail Client ID not configured'))
+      const error = 'Gmail Client ID not configured in environment variables'
+      debugLog('ERROR:', error)
+      reject(new Error(error))
       return
     }
 
+    debugLog('Client ID found:', GMAIL_CLIENT_ID.substring(0, 20) + '...')
+
+    // Check if script already loaded
+    if (window.gapi && window.gapi.client) {
+      debugLog('Google API already loaded')
+      if (window.gapi.auth2 && window.gapi.auth2.getAuthInstance()) {
+        resolve(window.gapi.auth2.getAuthInstance())
+        return
+      }
+    }
+
     // Load Google API
+    debugLog('Loading Google API script...')
     const script = document.createElement('script')
     script.src = 'https://apis.google.com/js/api.js'
     script.onload = () => {
+      debugLog('Google API script loaded, initializing client...')
       window.gapi.load('client:auth2', () => {
+        debugLog('Initializing with config:', {
+          clientId: GMAIL_CLIENT_ID.substring(0, 20) + '...',
+          scope: GMAIL_SCOPES
+        })
+        
         window.gapi.client.init({
           clientId: GMAIL_CLIENT_ID,
           scope: GMAIL_SCOPES,
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest']
         }).then(() => {
+          debugLog('Gmail client initialized successfully')
           resolve(window.gapi.auth2.getAuthInstance())
-        }).catch(reject)
+        }).catch((error) => {
+          debugLog('ERROR initializing client:', error)
+          reject(error)
+        })
       })
     }
-    script.onerror = reject
+    script.onerror = (error) => {
+      debugLog('ERROR loading Google API script:', error)
+      reject(new Error('Failed to load Google API script'))
+    }
     document.body.appendChild(script)
   })
 }
@@ -92,12 +126,20 @@ export const initGmailClient = () => {
 // Sign in to Gmail
 export const signInToGmail = async () => {
   try {
+    debugLog('Starting sign-in process...')
     const authInstance = await initGmailClient()
+    
     if (authInstance.isSignedIn.get()) {
+      debugLog('User already signed in')
       return authInstance.currentUser.get()
     }
-    return await authInstance.signIn()
+    
+    debugLog('Prompting user to sign in...')
+    const user = await authInstance.signIn()
+    debugLog('Sign-in successful')
+    return user
   } catch (error) {
+    debugLog('ERROR during sign-in:', error)
     console.error('Gmail sign-in error:', error)
     throw error
   }
