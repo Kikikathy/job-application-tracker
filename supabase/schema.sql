@@ -30,7 +30,7 @@ CREATE TABLE documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     document_type document_type NOT NULL,
-    file_name TEXT NOT NULL,
+    file_name TEXT NOT NULL,f
     file_url TEXT NOT NULL,
     file_size INTEGER,
     version_number INTEGER DEFAULT 1,
