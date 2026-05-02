@@ -316,6 +316,8 @@ export default function Dashboard() {
         return <Clock className="w-4 h-4 text-yellow-500" />
       case 'responded':
         return <CheckCircle className="w-4 h-4 text-green-500" />
+      case 'interview':
+        return <CheckCircle className="w-4 h-4 text-blue-500" />
       case 'no_response':
         return <XCircle className="w-4 h-4 text-gray-500" />
       default:
@@ -444,6 +446,7 @@ export default function Dashboard() {
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="responded">Responded</option>
+          <option value="interview">Interview</option>
           <option value="no_response">No Response</option>
           <option value="in_progress">In Progress</option>
           <option value="rejected">Rejected</option>
@@ -548,6 +551,7 @@ export default function Dashboard() {
                     >
                       <option value="pending">Pending</option>
                       <option value="responded">Responded</option>
+                      <option value="interview">Interview</option>
                       <option value="no_response">No Response</option>
                     </select>
                   </div>
@@ -654,6 +658,7 @@ export default function Dashboard() {
                     >
                       <option value="pending">Pending</option>
                       <option value="responded">Responded</option>
+                      <option value="interview">Interview</option>
                       <option value="no_response">No Response</option>
                     </select>
                   </div>
