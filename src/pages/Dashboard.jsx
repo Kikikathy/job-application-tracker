@@ -36,6 +36,7 @@ export default function Dashboard() {
     total: 0,
     pending: 0,
     responded: 0,
+    interview: 0,
     rejected: 0,
     successful: 0
   })
@@ -107,10 +108,11 @@ export default function Dashboard() {
     const total = applications.length
     const pending = applications.filter(app => app.response_status === 'pending').length
     const responded = applications.filter(app => app.response_status === 'responded').length
+    const interview = applications.filter(app => app.response_status === 'interview').length
     const rejected = applications.filter(app => app.final_outcome === 'rejected').length
     const successful = applications.filter(app => app.final_outcome === 'successful').length
 
-    setStats({ total, pending, responded, rejected, successful })
+    setStats({ total, pending, responded, interview, rejected, successful })
   }
 
   const handleSubmit = async (e) => {
@@ -166,6 +168,37 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error updating status:', error)
       alert('Error updating status')
+    }
+  }
+
+  const handleLinkSave = async (url, documentType) => {
+    if (!url || !selectedAppForDocs) return
+
+    try {
+      setUploadingDoc(true)
+
+      // Save link as document metadata to database
+      const { error } = await supabase
+        .from('documents')
+        .insert([{
+          application_id: selectedAppForDocs.id,
+          document_type: documentType,
+          file_name: `${documentType}_link`,
+          file_url: url,
+          file_size: 0
+        }])
+
+      if (error) throw error
+
+      alert('Link saved successfully!')
+      
+      // Refresh documents
+      await fetchAllDocuments(applications)
+    } catch (error) {
+      console.error('Error saving link:', error)
+      alert('Error saving link: ' + error.message)
+    } finally {
+      setUploadingDoc(false)
     }
   }
 
@@ -404,6 +437,15 @@ export default function Dashboard() {
               <p className="text-2xl font-bold text-green-600">{stats.responded}</p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-400" />
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Interview</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.interview}</p>
+            </div>
+            <Calendar className="w-8 h-8 text-blue-400" />
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -784,22 +826,36 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Portfolio
+                      Portfolio (PDF, DOC, Video, or Link)
                     </label>
                     <input
                       type="file"
-                      accept=".pdf,.doc,.docx"
+                      accept=".pdf,.doc,.docx,.mp4,.mov,.avi,.mkv,.webm"
                       onChange={(e) => handleFileUpload(e, 'portfolio')}
                       disabled={uploadingDoc}
                       className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Or paste a link below:</p>
+                    <input
+                      type="url"
+                      placeholder="https://portfolio-link.com"
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          handleLinkSave(e.target.value, 'portfolio')
+                          e.target.value = ''
+                        }
+                      }}
+                      disabled={uploadingDoc}
+                      className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Other Documents
+                      Other Documents (PDF, DOC, Video)
                     </label>
                     <input
                       type="file"
+                      accept=".pdf,.doc,.docx,.mp4,.mov,.avi,.mkv,.webm"
                       onChange={(e) => handleFileUpload(e, 'other')}
                       disabled={uploadingDoc}
                       className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
