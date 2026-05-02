@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { 
-  Plus, 
-  Search, 
+import EmailIntegration from '../components/EmailIntegration'
+import {
+  Plus,
+  Search,
   Calendar,
   Building2,
   Briefcase,
@@ -391,6 +392,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Email Integration */}
+      <EmailIntegration onApplicationsDetected={fetchApplications} />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
