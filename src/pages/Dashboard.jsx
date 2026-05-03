@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import EmailIntegration from '../components/EmailIntegration'
 import {
   Plus,
   Search,
@@ -37,7 +36,6 @@ export default function Dashboard() {
     total: 0,
     pending: 0,
     responded: 0,
-    interview: 0,
     rejected: 0,
     successful: 0
   })
@@ -109,11 +107,10 @@ export default function Dashboard() {
     const total = applications.length
     const pending = applications.filter(app => app.response_status === 'pending').length
     const responded = applications.filter(app => app.response_status === 'responded').length
-    const interview = applications.filter(app => app.response_status === 'interview').length
     const rejected = applications.filter(app => app.final_outcome === 'rejected').length
     const successful = applications.filter(app => app.final_outcome === 'successful').length
 
-    setStats({ total, pending, responded, interview, rejected, successful })
+    setStats({ total, pending, responded, rejected, successful })
   }
 
   const handleSubmit = async (e) => {
@@ -350,8 +347,6 @@ export default function Dashboard() {
         return <Clock className="w-4 h-4 text-yellow-500" />
       case 'responded':
         return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'interview':
-        return <CheckCircle className="w-4 h-4 text-blue-500" />
       case 'no_response':
         return <XCircle className="w-4 h-4 text-gray-500" />
       default:
@@ -392,9 +387,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Email Integration */}
-      <EmailIntegration onApplicationsDetected={fetchApplications} />
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -415,7 +407,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -441,15 +433,6 @@ export default function Dashboard() {
               <p className="text-2xl font-bold text-green-600">{stats.responded}</p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-400" />
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Interview</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.interview}</p>
-            </div>
-            <Calendar className="w-8 h-8 text-blue-400" />
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -492,7 +475,6 @@ export default function Dashboard() {
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="responded">Responded</option>
-          <option value="interview">Interview</option>
           <option value="no_response">No Response</option>
           <option value="in_progress">In Progress</option>
           <option value="rejected">Rejected</option>
@@ -597,7 +579,6 @@ export default function Dashboard() {
                     >
                       <option value="pending">Pending</option>
                       <option value="responded">Responded</option>
-                      <option value="interview">Interview</option>
                       <option value="no_response">No Response</option>
                     </select>
                   </div>
@@ -704,7 +685,6 @@ export default function Dashboard() {
                     >
                       <option value="pending">Pending</option>
                       <option value="responded">Responded</option>
-                      <option value="interview">Interview</option>
                       <option value="no_response">No Response</option>
                     </select>
                   </div>

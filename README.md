@@ -1,19 +1,23 @@
 # 📋 Job Application Tracker
 
-A comprehensive web application to track and manage your job applications with document management and optional email integration.
+A comprehensive web application to track and manage your job applications with document management capabilities.
+
+## 🚀 Live Demo
+**[View Live Application](https://job-application-tracker-sigma-gules.vercel.app)**
 
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Deployment](https://img.shields.io/badge/deployment-vercel-black.svg)
 
 ## ✨ Features
 
-### 🎯 Core Features (Fully Implemented)
+### 🎯 Core Features
 
 #### Application Management
 - ✅ **Add, Edit, Delete** job applications
 - ✅ **Search** by company name or position title
-- ✅ **Filter** by status (pending, responded, interview, rejected, successful)
-- ✅ **Dashboard statistics** - Track total, pending, responded, interviews, rejections, and offers
+- ✅ **Filter** by status (pending, responded, rejected, successful)
+- ✅ **Dashboard statistics** - Track total, pending, responded, rejections, and offers
 - ✅ **Notes** - Add detailed notes for each application
 
 #### Status Tracking
@@ -48,17 +52,6 @@ A comprehensive web application to track and manage your job applications with d
 - ✅ **Loading States** - Smooth animations and feedback
 - ✅ **Status Badges** - Visual indicators for application status
 
-### 📧 Email Integration (Optional)
-
-- 📧 **Gmail API Integration** - Connect your Gmail account
-- 📧 **Auto-Detection** - Scan emails for job applications
-- 📧 **Smart Extraction** - Automatically extract company names and positions
-- 📧 **Status Updates** - Detect interview invitations, rejections, and offers
-- 📧 **Bulk Import** - Import multiple detected applications at once
-- 📧 **Privacy First** - Only reads emails, never sends or deletes
-
-**Note:** Email integration requires Google Cloud OAuth setup. See `EMAIL_INTEGRATION_GUIDE.md` for details.
-
 ## 🚀 Tech Stack
 
 - **Frontend:** React 18 + Vite 8
@@ -67,7 +60,6 @@ A comprehensive web application to track and manage your job applications with d
 - **Icons:** Lucide React
 - **Date Handling:** date-fns
 - **Routing:** React Router DOM 6
-- **Email Integration:** Gmail API (Optional)
 - **Hosting:** Vercel
 
 ## 📁 Project Structure
@@ -77,24 +69,19 @@ job-application-tracker/
 ├── src/
 │   ├── components/           # React components
 │   │   ├── Auth.jsx         # Authentication component
-│   │   ├── Layout.jsx       # App layout with navigation
-│   │   └── EmailIntegration.jsx  # Gmail integration
+│   │   └── Layout.jsx       # App layout with navigation
 │   ├── pages/               # Page components
 │   │   └── Dashboard.jsx    # Main dashboard
 │   ├── lib/                 # Utilities and services
-│   │   ├── supabase.js     # Supabase client
-│   │   └── gmail.js        # Gmail API integration
+│   │   └── supabase.js     # Supabase client
 │   ├── App.jsx             # Main app component
 │   ├── main.jsx            # Entry point
 │   └── index.css           # Global styles
 ├── supabase/               # Database schema
-│   ├── schema.sql          # Main database schema
-│   └── add_interview_status.sql  # Migration for interview status
+│   └── schema.sql          # Main database schema
 ├── public/                 # Static assets
 ├── .env.example           # Environment variables template
 ├── SETUP.md              # Detailed setup instructions
-├── EMAIL_INTEGRATION_GUIDE.md  # Gmail setup guide
-├── GMAIL_TROUBLESHOOTING.md    # Debugging guide
 ├── INTERVIEW_STATUS_FIX.md     # Database migration guide
 └── README.md             # This file
 ```
@@ -110,7 +97,7 @@ job-application-tracker/
 - application_date (date, required)
 - application_method (text)
 - job_posting_url (text)
-- response_status (enum: pending, responded, interview, no_response)
+- response_status (enum: pending, responded, no_response)
 - final_outcome (enum: in_progress, rejected, successful, withdrawn)
 - notes (text)
 - created_at (timestamp)
@@ -190,17 +177,6 @@ npm run dev
 
 For detailed setup instructions, see [SETUP.md](SETUP.md)
 
-## 📧 Email Integration Setup (Optional)
-
-To enable Gmail integration:
-
-1. Follow the guide in [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md)
-2. Set up Google Cloud Project and OAuth 2.0
-3. Add Gmail credentials to `.env`
-4. Restart the dev server
-
-**Note:** The app works perfectly without email integration for manual tracking.
-
 ## 🚀 Deployment
 
 ### Deploy to Vercel
@@ -224,10 +200,6 @@ To enable Gmail integration:
    - Click "Deploy"
    - Wait for build to complete
    - Your app will be live at `https://your-app.vercel.app`
-
-5. **Update OAuth (if using Gmail integration):**
-   - Add your Vercel URL to Google Cloud Console
-   - Update authorized origins and redirect URIs
 
 ## 📖 Usage Guide
 
@@ -272,15 +244,7 @@ To enable Gmail integration:
 
 ## 🔧 Troubleshooting
 
-### Interview Status Error
-If selecting "interview" returns an error, run this SQL in Supabase:
-```sql
-ALTER TYPE response_status ADD VALUE IF NOT EXISTS 'interview';
-```
 See [INTERVIEW_STATUS_FIX.md](INTERVIEW_STATUS_FIX.md) for details.
-
-### Gmail Connection Issues
-See [GMAIL_TROUBLESHOOTING.md](GMAIL_TROUBLESHOOTING.md) for detailed debugging steps.
 
 ### Common Issues
 
@@ -310,17 +274,13 @@ See [GMAIL_TROUBLESHOOTING.md](GMAIL_TROUBLESHOOTING.md) for detailed debugging 
 - [x] Dashboard statistics
 - [x] Video file support
 - [x] Portfolio links
-- [x] Gmail API integration (code complete)
 - [x] Responsive design
-
-### 🚧 In Progress
-- [ ] Gmail OAuth configuration
-- [ ] Email auto-detection testing
 
 ### 📋 Future Enhancements
 - [ ] Export to CSV/Excel
 - [ ] Analytics dashboard
 - [ ] Follow-up reminders
+- [ ] Email notifications
 - [ ] Browser extension
 - [ ] Mobile app
 - [ ] Interview preparation notes
@@ -358,8 +318,6 @@ If this project helps you in your job search, please give it a star! ⭐
 
 ---
 
-**Built with ❤️ by Bob to make job hunting less stressful**
-
-**Live Demo:** [Coming Soon]
+**Built with ❤️ to make job hunting less stressful**
 
 **Repository:** https://github.com/Kikikathy/job-application-tracker
