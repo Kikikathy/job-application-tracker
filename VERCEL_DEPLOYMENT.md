@@ -86,8 +86,8 @@ vercel --prod
 1. Go to your Supabase project dashboard
 2. Navigate to **Authentication** → **URL Configuration**
 3. Add your Vercel deployment URL to:
-   - **Site URL**: `https://your-app.vercel.app`
-   - **Redirect URLs**: `https://your-app.vercel.app/**`
+   - **Site URL**: `https://job-application-tracker-two-xi.vercel.app`
+   - **Redirect URLs**: `https://job-application-tracker-two-xi.vercel.app/**`
 
 ## Step 4: Test Your Deployment
 

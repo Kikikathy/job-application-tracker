@@ -96,7 +96,7 @@ The application will open at http://localhost:5173
    - `VITE_SUPABASE_ANON_KEY`
 6. Click "Deploy"
 
-Your app will be live at `https://your-app-name.vercel.app`
+Your app will be live at `https://job-application-tracker-two-xi.vercel.app`
 
 ## Troubleshooting
 

@@ -3,7 +3,7 @@
 A comprehensive web application to track and manage your job applications with document management capabilities.
 
 ## 🚀 Live Demo
-**[View Live Application](https://job-application-tracker-sigma-gules.vercel.app)**
+**[View Live Application](https://job-application-tracker-two-xi.vercel.app)**
 
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -199,7 +199,7 @@ For detailed setup instructions, see [SETUP.md](SETUP.md)
 4. **Deploy:**
    - Click "Deploy"
    - Wait for build to complete
-   - Your app will be live at `https://your-app.vercel.app`
+   - Your app will be live at `https://job-application-tracker-two-xi.vercel.app`
 
 ## 📖 Usage Guide
 
