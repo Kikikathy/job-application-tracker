@@ -17,21 +17,48 @@ export default function Auth() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        // Sign up with email confirmation required
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
         })
+        
         if (error) throw error
+        
+        // Clear form after successful signup
+        setEmail('')
+        setPassword('')
+        
         setMessage({
           type: 'success',
-          text: 'Check your email for the confirmation link!',
+          text: '✅ Account created! Please check your email to verify your account before signing in.',
         })
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        // Sign in with password
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
-        if (error) throw error
+        
+        if (error) {
+          // Provide specific error messages
+          if (error.message.includes('Invalid login credentials')) {
+            throw new Error('Invalid email or password. Please check your credentials and try again.')
+          } else if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please verify your email address before signing in. Check your inbox for the confirmation link.')
+          } else {
+            throw error
+          }
+        }
+        
+        // Check if email is confirmed
+        if (data.user && !data.user.email_confirmed_at) {
+          await supabase.auth.signOut()
+          throw new Error('Please verify your email address before signing in. Check your inbox for the confirmation link.')
+        }
       }
     } catch (error) {
       setMessage({

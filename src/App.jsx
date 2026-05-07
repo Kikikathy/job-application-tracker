@@ -12,7 +12,14 @@ function App() {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+      // Only set session if email is confirmed
+      if (session?.user?.email_confirmed_at) {
+        setSession(session)
+      } else if (session) {
+        // Sign out if email not confirmed
+        supabase.auth.signOut()
+        setSession(null)
+      }
       setLoading(false)
     })
 
@@ -20,7 +27,16 @@ function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+      // Only allow access if email is confirmed
+      if (session?.user?.email_confirmed_at) {
+        setSession(session)
+      } else if (session && _event === 'SIGNED_IN') {
+        // Sign out immediately if trying to sign in without email confirmation
+        supabase.auth.signOut()
+        setSession(null)
+      } else {
+        setSession(null)
+      }
     })
 
     return () => subscription.unsubscribe()
