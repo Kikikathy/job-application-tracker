@@ -53,10 +53,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Context menu for quick save
-chrome.contextMenus.create({
-  id: 'save-job-application',
-  title: 'Save as Job Application',
-  contexts: ['page', 'selection']
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'save-job-application',
+    title: 'Save as Job Application',
+    contexts: ['page', 'selection']
+  });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
