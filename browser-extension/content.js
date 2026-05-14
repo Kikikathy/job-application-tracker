@@ -32,6 +32,20 @@ class JobApplicationDetector {
       this.detectJobApplication();
     }
 
+    // SPA support: watch for URL changes
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+      const url = location.href;
+      if (url !== lastUrl) {
+        lastUrl = url;
+        console.log('🎯 Job Tracker: URL changed via SPA, re-detecting...');
+        setTimeout(() => {
+          this.jobData.job_posting_url = window.location.href;
+          this.detectJobApplication();
+        }, 1500); // Give SPA time to render
+      }
+    }).observe(document, {subtree: true, childList: true});
+
     // Listen for messages from popup
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log('🎯 Job Tracker: Message received:', request);
@@ -226,15 +240,29 @@ class JobApplicationDetector {
   showDetectionBadge() {
     console.log('🎯 Job Tracker: showDetectionBadge called');
     
-    // Check if badge already exists
-    if (document.getElementById('job-tracker-badge')) {
-      console.log('🎯 Job Tracker: Badge already exists');
-      return;
+    // Remove any existing badge first
+    const existingBadge = document.getElementById('job-tracker-badge');
+    if (existingBadge) {
+      console.log('🎯 Job Tracker: Removing existing badge');
+      existingBadge.remove();
     }
 
+    // Create badge element
     const badge = document.createElement('div');
     badge.id = 'job-tracker-badge';
     badge.className = 'job-tracker-badge';
+    
+    // Set inline styles as fallback to ensure visibility
+    badge.style.cssText = `
+      position: fixed !important;
+      top: 20px !important;
+      right: 20px !important;
+      z-index: 2147483647 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    `;
+    
     badge.innerHTML = `
       <div class="badge-content">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -245,24 +273,50 @@ class JobApplicationDetector {
         <button id="track-job-btn" class="track-btn">Track This Job</button>
       </div>
     `;
-    document.body.appendChild(badge);
-    console.log('🎯 Job Tracker: Badge added to page');
+    
+    // Append to body with error handling
+    try {
+      document.body.appendChild(badge);
+      console.log('🎯 Job Tracker: Badge added to page');
+      
+      // Force reflow to ensure styles are applied
+      badge.offsetHeight;
+      
+      // Verify badge is visible
+      const rect = badge.getBoundingClientRect();
+      console.log('🎯 Job Tracker: Badge position:', rect);
+      
+      // Add click handler with slight delay to ensure DOM is ready
+      setTimeout(() => {
+        const trackBtn = document.getElementById('track-job-btn');
+        if (trackBtn) {
+          trackBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎯 Job Tracker: Track button clicked!');
+            this.openTrackerPopup();
+          });
+          console.log('🎯 Job Tracker: Click handler attached');
+        } else {
+          console.error('🎯 Job Tracker: Track button not found!');
+        }
+      }, 100);
 
-    // Add click handler
-    const trackBtn = document.getElementById('track-job-btn');
-    if (trackBtn) {
-      trackBtn.addEventListener('click', () => {
-        console.log('🎯 Job Tracker: Track button clicked!');
-        this.openTrackerPopup();
-      });
-      console.log('🎯 Job Tracker: Click handler attached');
+      // Auto-hide after 20 seconds (increased from 10)
+      setTimeout(() => {
+        if (badge.parentElement) {
+          badge.classList.add('fade-out');
+          setTimeout(() => {
+            if (badge.parentElement) {
+              badge.remove();
+            }
+          }, 500);
+        }
+      }, 20000);
+      
+    } catch (error) {
+      console.error('🎯 Job Tracker: Error adding badge:', error);
     }
-
-    // Auto-hide after 10 seconds
-    setTimeout(() => {
-      badge.classList.add('fade-out');
-      setTimeout(() => badge.remove(), 500);
-    }, 10000);
   }
 
   openTrackerPopup() {

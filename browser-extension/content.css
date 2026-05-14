@@ -1,66 +1,74 @@
 /* Job Application Tracker - Content Script Styles */
 
 .job-tracker-badge {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 999999;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  animation: slideIn 0.3s ease-out;
-  max-width: 350px;
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 2147483647 !important; /* Maximum z-index value */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  padding: 16px 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  animation: slideIn 0.3s ease-out !important;
+  max-width: 350px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .badge-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
 
 .badge-content svg {
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
 }
 
 .badge-content span {
-  font-weight: 600;
-  font-size: 14px;
-  flex: 1;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  flex: 1 !important;
 }
 
 .track-btn {
-  background: white;
-  color: #667eea;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+  background: white !important;
+  color: #667eea !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  white-space: nowrap !important;
 }
 
 .track-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .job-tracker-notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 999999;
-  background: white;
-  color: #1f2937;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border-left: 4px solid #10b981;
-  animation: slideInBottom 0.3s ease-out;
-  max-width: 400px;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 2147483647 !important; /* Maximum z-index value */
+  background: white !important;
+  color: #1f2937 !important;
+  padding: 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border-left: 4px solid #10b981 !important;
+  animation: slideInBottom 0.3s ease-out !important;
+  max-width: 400px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .notification-content {
