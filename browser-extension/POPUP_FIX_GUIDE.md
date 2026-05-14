@@ -2,13 +2,19 @@
 
 ## What Was Fixed
 
-The job application tracker extension was detecting jobs on Glassdoor and extracting data correctly, but the pop-up badge wasn't appearing on screen. Here's what was fixed:
+The job application tracker extension was detecting jobs on Glassdoor and extracting data correctly, but had two main issues:
+1. The pop-up badge wasn't appearing on screen
+2. Clicking "Track This Job" button didn't open a new tab
+
+Here's what was fixed:
 
 ### Issues Identified
 1. **Z-index conflicts**: Glassdoor's elements were covering the badge
 2. **CSS specificity**: Site styles were overriding extension styles
 3. **Timing issues**: Badge was auto-hiding too quickly
 4. **Visibility problems**: Badge wasn't forcing itself to be visible
+5. **Tab opening failure**: chrome.runtime.sendMessage wasn't working properly
+6. **No fallback mechanism**: If messaging failed, nothing happened
 
 ### Solutions Implemented
 
@@ -27,7 +33,7 @@ The job application tracker extension was detecting jobs on Glassdoor and extrac
 - Gives you more time to see and interact with the badge
 
 #### 4. Better Error Handling
-- Added try-catch blocks for badge creation
+- Added try-catch blocks for badge creation and tab opening
 - Logs badge position to console for debugging
 - Removes existing badges before creating new ones
 
@@ -35,6 +41,12 @@ The job application tracker extension was detecting jobs on Glassdoor and extrac
 - Added delay to ensure DOM is ready
 - Prevents event bubbling with `stopPropagation()`
 - Better error logging if button isn't found
+
+#### 6. Tab Opening with Fallback
+- Added `window.open()` fallback if chrome.runtime.sendMessage fails
+- Re-extracts job data before opening to ensure freshness
+- Improved error handling in background script
+- Sets `active: true` to ensure new tab is focused
 
 ## How to Test
 
@@ -69,17 +81,29 @@ The badge should appear in the **top-right corner** of the page with:
    🎯 Job Tracker: Position title: [Job Title]
    🎯 Job Tracker: Badge added to page
    🎯 Job Tracker: Badge position: DOMRect {...}
+   🎯 Job Tracker: Click handler attached
    ```
 
 ### Step 5: Click the Button
 1. Click the "Track This Job" button on the badge
-2. A new tab should open with your Job Application Tracker
-3. The form should be pre-filled with:
+2. You should see in console:
+   ```
+   🎯 Job Tracker: Track button clicked!
+   🎯 Job Tracker: openTrackerPopup called
+   🎯 Job Tracker: Opening URL: https://job-application-tracker-two-xi.vercel.app/?...
+   🎯 Job Tracker Background: Message received
+   🎯 Job Tracker Background: Opening tracker tab with URL: ...
+   🎯 Job Tracker Background: Tab created successfully
+   ```
+3. A new tab should open with your Job Application Tracker
+4. The "Add Application" modal should appear automatically
+5. The form should be pre-filled with:
    - Company Name
    - Position Title
    - Job URL
    - Application Method (Glassdoor)
    - Application Date (today)
+   - Notes (job description excerpt)
 
 ## Troubleshooting
 
