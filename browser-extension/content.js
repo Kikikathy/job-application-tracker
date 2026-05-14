@@ -63,6 +63,7 @@ class JobApplicationDetector {
 
   detectPlatform() {
     const hostname = window.location.hostname;
+    // International job boards
     if (hostname.includes('linkedin.com')) return 'LinkedIn';
     if (hostname.includes('indeed.com')) return 'Indeed';
     if (hostname.includes('glassdoor.com')) return 'Glassdoor';
@@ -73,22 +74,53 @@ class JobApplicationDetector {
     if (hostname.includes('workday.com')) return 'Workday';
     if (hostname.includes('smartrecruiters.com')) return 'SmartRecruiters';
     if (hostname.includes('icims.com')) return 'iCIMS';
-    return 'Company Website';
+    
+    // African job boards
+    if (hostname.includes('brightermonday.co')) return 'BrighterMonday';
+    if (hostname.includes('brightermonday.com')) return 'BrighterMonday';
+    if (hostname.includes('fuzu.com')) return 'Fuzu';
+    if (hostname.includes('myjobmag.com')) return 'MyJobMag';
+    if (hostname.includes('jobberman.com')) return 'Jobberman';
+    if (hostname.includes('careers24.com')) return 'Careers24';
+    if (hostname.includes('pnet.co.za')) return 'PNet';
+    
+    // Extract domain name as platform
+    const domain = hostname.replace('www.', '').split('.')[0];
+    return domain.charAt(0).toUpperCase() + domain.slice(1);
   }
 
   detectJobApplication() {
     console.log('🎯 Job Tracker: detectJobApplication called');
     // Check if this is a job posting or application page
     const url = window.location.href.toLowerCase();
+    const pageText = document.body.textContent.toLowerCase();
     console.log('🎯 Job Tracker: Current URL:', url);
     
-    const isJobPage = url.includes('/job') ||
-                      url.includes('/career') ||
-                      url.includes('/apply') ||
-                      url.includes('/position') ||
-                      url.includes('/opening');
+    // URL-based detection (more specific)
+    const urlIndicatesJob = url.includes('/job') ||
+                           url.includes('/career') ||
+                           url.includes('/apply') ||
+                           url.includes('/position') ||
+                           url.includes('/opening') ||
+                           url.includes('/vacancy') ||
+                           url.includes('/vacancies') ||
+                           url.includes('/opportunities');
 
-    console.log('🎯 Job Tracker: Is job page?', isJobPage);
+    // Content-based detection (broader, works on any site)
+    const contentIndicatesJob = (
+      (pageText.includes('apply now') || pageText.includes('apply for') || pageText.includes('submit application')) &&
+      (pageText.includes('job description') || pageText.includes('responsibilities') || pageText.includes('requirements') || pageText.includes('qualifications'))
+    );
+    
+    // Check for job-related headings
+    const hasJobHeadings = document.querySelector('h1, h2, h3')?.textContent.toLowerCase().match(/(job|position|role|vacancy|career|opportunity)/);
+
+    const isJobPage = urlIndicatesJob || contentIndicatesJob || hasJobHeadings;
+    console.log('🎯 Job Tracker: Is job page?', isJobPage, {
+      urlIndicatesJob,
+      contentIndicatesJob,
+      hasJobHeadings: !!hasJobHeadings
+    });
 
     if (isJobPage) {
       this.extractJobData();
@@ -134,9 +166,15 @@ class JobApplicationDetector {
       // Glassdoor
       '.employer-name',
       '[data-test="employer-name"]',
+      // BrighterMonday & African job boards
+      '.company-name',
+      '.employer-name',
+      '.company',
+      '[class*="company"]',
+      '[class*="employer"]',
+      '[class*="organization"]',
       // Generic
       '[itemprop="hiringOrganization"]',
-      '.company-name',
       '.employer',
       'meta[property="og:site_name"]'
     ];
@@ -145,7 +183,7 @@ class JobApplicationDetector {
       const element = document.querySelector(selector);
       if (element) {
         const text = element.getAttribute('content') || element.textContent;
-        if (text && text.trim() && !text.includes('http')) {
+        if (text && text.trim() && !text.includes('http') && text.length < 100) {
           return text.trim();
         }
       }
@@ -153,7 +191,7 @@ class JobApplicationDetector {
 
     // Try to extract from page title
     const title = document.title;
-    const match = title.match(/at\s+([^|•\-]+)/i);
+    const match = title.match(/at\s+([^|•\-]+)/i) || title.match(/\|\s*([^|•\-]+)$/);
     if (match) return match[1].trim();
 
     return '';
@@ -178,11 +216,18 @@ class JobApplicationDetector {
       // Glassdoor
       '[data-test="job-title"]',
       '.job-title',
+      // BrighterMonday & African job boards
+      '.job-title',
+      '.position-title',
+      '[class*="job-title"]',
+      '[class*="position"]',
+      '[class*="role"]',
       // Generic
       '[itemprop="title"]',
       'h1.job-title',
       'h1.position-title',
       'h1',
+      'h2',
       'meta[property="og:title"]'
     ];
 
@@ -191,7 +236,11 @@ class JobApplicationDetector {
       if (element) {
         const text = element.getAttribute('content') || element.textContent;
         if (text && text.trim() && text.length < 200 && text.length > 3) {
-          return text.trim();
+          // Filter out common non-job-title text
+          const lowerText = text.toLowerCase();
+          if (!lowerText.includes('search') && !lowerText.includes('browse') && !lowerText.includes('find jobs')) {
+            return text.trim();
+          }
         }
       }
     }
@@ -199,7 +248,12 @@ class JobApplicationDetector {
     // Try to extract from page title
     const title = document.title;
     const match = title.match(/^([^|•\-]+)/);
-    if (match && match[1].trim().length > 3) return match[1].trim();
+    if (match && match[1].trim().length > 3) {
+      const extracted = match[1].trim();
+      if (!extracted.toLowerCase().includes('search') && !extracted.toLowerCase().includes('browse')) {
+        return extracted;
+      }
+    }
 
     return '';
   }
