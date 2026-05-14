@@ -1,8 +1,11 @@
 // Job Application Tracker - Content Script
 // Detects job application forms and extracts relevant information
 
+console.log('🎯 Job Tracker Extension: Content script loaded');
+
 class JobApplicationDetector {
   constructor() {
+    console.log('🎯 Job Tracker: Initializing detector');
     this.jobData = {
       company_name: '',
       position_title: '',
@@ -11,21 +14,30 @@ class JobApplicationDetector {
       application_date: new Date().toISOString().split('T')[0],
       notes: ''
     };
+    console.log('🎯 Job Tracker: Initial job data:', this.jobData);
     this.init();
   }
 
   init() {
+    console.log('🎯 Job Tracker: Init called, readyState:', document.readyState);
+    
     // Wait for page to fully load
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.detectJobApplication());
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('🎯 Job Tracker: DOMContentLoaded fired');
+        this.detectJobApplication();
+      });
     } else {
+      console.log('🎯 Job Tracker: Document already loaded, detecting immediately');
       this.detectJobApplication();
     }
 
     // Listen for messages from popup
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      console.log('🎯 Job Tracker: Message received:', request);
       if (request.action === 'getJobData') {
         this.extractJobData();
+        console.log('🎯 Job Tracker: Sending job data:', this.jobData);
         sendResponse({ success: true, data: this.jobData });
       } else if (request.action === 'saveApplication') {
         this.saveToTracker(request.data);
@@ -51,16 +63,22 @@ class JobApplicationDetector {
   }
 
   detectJobApplication() {
+    console.log('🎯 Job Tracker: detectJobApplication called');
     // Check if this is a job posting or application page
     const url = window.location.href.toLowerCase();
-    const isJobPage = url.includes('/job') || 
-                      url.includes('/career') || 
+    console.log('🎯 Job Tracker: Current URL:', url);
+    
+    const isJobPage = url.includes('/job') ||
+                      url.includes('/career') ||
                       url.includes('/apply') ||
                       url.includes('/position') ||
                       url.includes('/opening');
 
+    console.log('🎯 Job Tracker: Is job page?', isJobPage);
+
     if (isJobPage) {
       this.extractJobData();
+      console.log('🎯 Job Tracker: Extracted data:', this.jobData);
       this.showDetectionBadge();
     }
 
@@ -69,14 +87,19 @@ class JobApplicationDetector {
   }
 
   extractJobData() {
+    console.log('🎯 Job Tracker: Extracting job data...');
+    
     // Extract company name
     this.jobData.company_name = this.extractCompanyName();
+    console.log('🎯 Job Tracker: Company name:', this.jobData.company_name);
     
     // Extract position title
     this.jobData.position_title = this.extractPositionTitle();
+    console.log('🎯 Job Tracker: Position title:', this.jobData.position_title);
     
     // Extract additional details
     this.jobData.notes = this.extractJobDescription();
+    console.log('🎯 Job Tracker: Notes length:', this.jobData.notes.length);
   }
 
   extractCompanyName() {
@@ -201,8 +224,13 @@ class JobApplicationDetector {
   }
 
   showDetectionBadge() {
+    console.log('🎯 Job Tracker: showDetectionBadge called');
+    
     // Check if badge already exists
-    if (document.getElementById('job-tracker-badge')) return;
+    if (document.getElementById('job-tracker-badge')) {
+      console.log('🎯 Job Tracker: Badge already exists');
+      return;
+    }
 
     const badge = document.createElement('div');
     badge.id = 'job-tracker-badge';
@@ -218,11 +246,17 @@ class JobApplicationDetector {
       </div>
     `;
     document.body.appendChild(badge);
+    console.log('🎯 Job Tracker: Badge added to page');
 
     // Add click handler
-    document.getElementById('track-job-btn').addEventListener('click', () => {
-      this.openTrackerPopup();
-    });
+    const trackBtn = document.getElementById('track-job-btn');
+    if (trackBtn) {
+      trackBtn.addEventListener('click', () => {
+        console.log('🎯 Job Tracker: Track button clicked!');
+        this.openTrackerPopup();
+      });
+      console.log('🎯 Job Tracker: Click handler attached');
+    }
 
     // Auto-hide after 10 seconds
     setTimeout(() => {
@@ -232,6 +266,9 @@ class JobApplicationDetector {
   }
 
   openTrackerPopup() {
+    console.log('🎯 Job Tracker: openTrackerPopup called');
+    console.log('🎯 Job Tracker: Current job data:', this.jobData);
+    
     // Encode job data as URL parameters
     const params = new URLSearchParams({
       company: this.jobData.company_name || '',
@@ -245,10 +282,13 @@ class JobApplicationDetector {
 
     // Open the Job Application Tracker web app with pre-filled data
     const trackerUrl = `https://job-application-tracker-two-xi.vercel.app/?${params.toString()}`;
+    console.log('🎯 Job Tracker: Opening URL:', trackerUrl);
     
     chrome.runtime.sendMessage({
       action: 'openTrackerTab',
       url: trackerUrl
+    }, (response) => {
+      console.log('🎯 Job Tracker: Message response:', response);
     });
 
     // Show success notification

@@ -53,11 +53,17 @@ export default function Dashboard() {
   })
 
   useEffect(() => {
+    console.log('🎯 Dashboard: Component mounted');
     fetchApplications()
     
     // Check for URL parameters from extension
     const urlParams = new URLSearchParams(window.location.search)
+    console.log('🎯 Dashboard: URL search params:', window.location.search);
+    console.log('🎯 Dashboard: Source param:', urlParams.get('source'));
+    
     if (urlParams.get('source') === 'extension') {
+      console.log('🎯 Dashboard: Extension source detected!');
+      
       // Pre-fill form with data from extension
       const extensionData = {
         company_name: urlParams.get('company') || '',
@@ -70,11 +76,15 @@ export default function Dashboard() {
         final_outcome: 'in_progress'
       }
       
+      console.log('🎯 Dashboard: Extension data:', extensionData);
       setFormData(extensionData)
       setShowAddModal(true)
+      console.log('🎯 Dashboard: Modal should be opening...');
       
       // Clean URL after reading parameters
       window.history.replaceState({}, document.title, window.location.pathname)
+    } else {
+      console.log('🎯 Dashboard: No extension source in URL');
     }
   }, [])
 

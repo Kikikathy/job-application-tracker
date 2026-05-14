@@ -1,7 +1,10 @@
 // Job Application Tracker - Background Service Worker
 
+console.log('🎯 Job Tracker: Background script loaded');
+
 // Listen for extension installation
 chrome.runtime.onInstalled.addListener((details) => {
+  console.log('🎯 Job Tracker: Extension installed/updated', details.reason);
   if (details.reason === 'install') {
     // Open welcome page on first install
     chrome.tabs.create({
@@ -12,9 +15,13 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('🎯 Job Tracker Background: Message received', request);
+  
   if (request.action === 'openTrackerTab') {
+    console.log('🎯 Job Tracker Background: Opening tracker tab with URL:', request.url);
     // Open the Job Application Tracker in a new tab
     chrome.tabs.create({ url: request.url }, (tab) => {
+      console.log('🎯 Job Tracker Background: Tab created', tab.id);
       sendResponse({ success: true, tabId: tab.id });
     });
     return true; // Keep the message channel open for async response
