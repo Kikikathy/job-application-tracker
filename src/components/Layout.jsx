@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { signOut } from '../lib/supabase'
-import { Briefcase, LogOut, Menu, X } from 'lucide-react'
+import { Briefcase, LogOut, Menu, X, Chrome } from 'lucide-react'
 
 export default function Layout({ children, session }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
 
   const handleSignOut = async () => {
     try {
@@ -33,6 +35,28 @@ export default function Layout({ children, session }) {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
+              <Link
+                to="/"
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  location.pathname === '/'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Briefcase className="w-4 h-4" />
+                <span>Dashboard</span>
+              </Link>
+              <Link
+                to="/extension"
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  location.pathname === '/extension'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Chrome className="w-4 h-4" />
+                <span>Extension</span>
+              </Link>
               <span className="text-sm text-gray-600">
                 {session?.user?.email}
               </span>
@@ -65,7 +89,31 @@ export default function Layout({ children, session }) {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200">
             <div className="px-4 py-3 space-y-2">
-              <div className="text-sm text-gray-600 pb-2 border-b border-gray-200">
+              <Link
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center space-x-2 w-full px-3 py-2 rounded-lg transition-colors ${
+                  location.pathname === '/'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Briefcase className="w-4 h-4" />
+                <span>Dashboard</span>
+              </Link>
+              <Link
+                to="/extension"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center space-x-2 w-full px-3 py-2 rounded-lg transition-colors ${
+                  location.pathname === '/extension'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Chrome className="w-4 h-4" />
+                <span>Extension</span>
+              </Link>
+              <div className="text-sm text-gray-600 pt-2 pb-2 border-t border-gray-200">
                 {session?.user?.email}
               </div>
               <button

@@ -1,0 +1,187 @@
+/* Job Application Tracker - Content Script Styles */
+
+.job-tracker-badge {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999999;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+  max-width: 350px;
+}
+
+.badge-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-content svg {
+  flex-shrink: 0;
+}
+
+.badge-content span {
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1;
+}
+
+.track-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.track-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.job-tracker-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999999;
+  background: white;
+  color: #1f2937;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid #10b981;
+  animation: slideInBottom 0.3s ease-out;
+  max-width: 400px;
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.notification-content svg {
+  flex-shrink: 0;
+  color: #10b981;
+}
+
+.notification-content > div {
+  flex: 1;
+}
+
+.notification-content strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.notification-content p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.save-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.save-btn:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.close-btn {
+  background: transparent;
+  color: #9ca3af;
+  border: none;
+  padding: 4px 8px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+  margin-left: auto;
+}
+
+.close-btn:hover {
+  color: #374151;
+  transform: scale(1.1);
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .job-tracker-badge,
+  .job-tracker-notification {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+  
+  .badge-content,
+  .notification-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .track-btn,
+  .save-btn {
+    width: 100%;
+  }
+}
+
+/* Made with Bob */

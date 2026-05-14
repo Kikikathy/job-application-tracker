@@ -232,10 +232,54 @@ class JobApplicationDetector {
   }
 
   openTrackerPopup() {
-    chrome.runtime.sendMessage({ 
-      action: 'openPopup',
-      data: this.jobData 
+    // Store the job data for the popup to access
+    chrome.storage.local.set({
+      pendingApplication: {
+        ...this.jobData,
+        timestamp: Date.now()
+      }
+    }, () => {
+      // Show notification to click extension icon
+      this.showClickExtensionNotification();
     });
+  }
+
+  showClickExtensionNotification() {
+    // Remove any existing notification
+    const existing = document.getElementById('job-tracker-click-notification');
+    if (existing) existing.remove();
+
+    const notification = document.createElement('div');
+    notification.id = 'job-tracker-click-notification';
+    notification.className = 'job-tracker-notification';
+    notification.innerHTML = `
+      <div class="notification-content">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <div>
+          <strong>Job Data Saved!</strong>
+          <p>Click the extension icon 🎯 in your toolbar to complete tracking</p>
+        </div>
+        <button class="close-btn">✕</button>
+      </div>
+    `;
+    document.body.appendChild(notification);
+
+    // Close button handler
+    notification.querySelector('.close-btn').addEventListener('click', () => {
+      notification.classList.add('fade-out');
+      setTimeout(() => notification.remove(), 300);
+    });
+
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.classList.add('fade-out');
+        setTimeout(() => notification.remove(), 300);
+      }
+    }, 10000);
   }
 
   monitorFormSubmissions() {

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { supabase } from './lib/supabase'
 import Auth from './components/Auth'
 import Dashboard from './pages/Dashboard'
+import ExtensionSettings from './components/ExtensionSettings'
 import Layout from './components/Layout'
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
               <Layout session={session}>
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
+                  <Route path="/extension" element={<ExtensionSettings />} />
                 </Routes>
               </Layout>
             ) : (

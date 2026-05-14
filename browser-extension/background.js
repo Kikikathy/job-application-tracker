@@ -12,22 +12,6 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'openPopup') {
-    // Store the job data temporarily
-    if (request.data) {
-      chrome.storage.local.set({
-        pendingApplication: {
-          ...request.data,
-          timestamp: Date.now()
-        }
-      });
-    }
-    
-    // Open the popup (this will be handled by the browser action)
-    chrome.action.openPopup();
-    sendResponse({ success: true });
-  }
-  
   if (request.action === 'saveCredentials') {
     // Save Supabase credentials
     chrome.storage.sync.set({
