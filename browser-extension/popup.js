@@ -95,6 +95,30 @@ class PopupController {
         chrome.tabs.create({ url: 'https://job-application-tracker-two-xi.vercel.app' });
       });
     }
+
+    // File input handlers
+    const fileInputs = ['resume', 'cover_letter', 'portfolio'];
+    fileInputs.forEach(inputId => {
+      const input = document.getElementById(inputId);
+      const fileName = document.getElementById(`${inputId}-name`);
+      
+      if (input && fileName) {
+        // Click on file name to trigger file input
+        fileName.addEventListener('click', () => input.click());
+        
+        // Update file name display when file is selected
+        input.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            fileName.textContent = file.name;
+            fileName.classList.add('has-file');
+          } else {
+            fileName.textContent = 'No file chosen';
+            fileName.classList.remove('has-file');
+          }
+        });
+      }
+    });
   }
 
   async loadJobData() {
@@ -173,14 +197,14 @@ class PopupController {
         user_id: this.session.user.id
       };
 
-      // Save to Supabase
+      // Save application to Supabase and get the ID
       const response = await fetch(`${this.supabaseUrl}/rest/v1/applications`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.session.access_token}`,
           'apikey': this.supabaseKey,
-          'Prefer': 'return=minimal'
+          'Prefer': 'return=representation'
         },
         body: JSON.stringify(applicationData)
       });
@@ -189,16 +213,50 @@ class PopupController {
         throw new Error('Failed to save application');
       }
 
+      const [savedApplication] = await response.json();
+      const applicationId = savedApplication.id;
+
+      // Upload documents if any
+      const documents = [];
+      const fileInputs = [
+        { id: 'resume', type: 'resume' },
+        { id: 'cover_letter', type: 'cover_letter' },
+        { id: 'portfolio', type: 'portfolio' }
+      ];
+
+      for (const { id, type } of fileInputs) {
+        const fileInput = document.getElementById(id);
+        if (fileInput && fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          saveBtn.textContent = `Uploading ${type}...`;
+          
+          try {
+            const uploadResult = await this.uploadDocument(file, type, applicationId);
+            if (uploadResult) {
+              documents.push(uploadResult);
+            }
+          } catch (uploadError) {
+            console.error(`Error uploading ${type}:`, uploadError);
+            // Continue with other uploads even if one fails
+          }
+        }
+      }
+
       // Show success message
-      this.showMessage('Application saved successfully!', 'success');
+      const docCount = documents.length;
+      const message = docCount > 0
+        ? `Application saved with ${docCount} document${docCount > 1 ? 's' : ''}!`
+        : 'Application saved successfully!';
       
-      // Clear form after 1 second
+      this.showMessage(message, 'success');
+      
+      // Clear form after 1.5 seconds
       setTimeout(() => {
         this.clearForm();
         
         // Clear pending application from storage
         chrome.storage.local.remove('pendingApplication');
-      }, 1000);
+      }, 1500);
 
     } catch (error) {
       console.error('Error saving application:', error);
@@ -206,6 +264,65 @@ class PopupController {
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = originalText;
+    }
+  }
+
+  async uploadDocument(file, documentType, applicationId) {
+    try {
+      // Create file path: userId/applicationId/documentType_timestamp_filename
+      const timestamp = Date.now();
+      const fileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${this.session.user.id}/${applicationId}/${documentType}_${timestamp}_${fileName}`;
+
+      // Upload file to Supabase Storage
+      const uploadResponse = await fetch(
+        `${this.supabaseUrl}/storage/v1/object/application-documents/${filePath}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.session.access_token}`,
+            'apikey': this.supabaseKey,
+            'Content-Type': file.type
+          },
+          body: file
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      // Get public URL
+      const fileUrl = `${this.supabaseUrl}/storage/v1/object/public/application-documents/${filePath}`;
+
+      // Save document metadata to database
+      const documentData = {
+        application_id: applicationId,
+        document_type: documentType,
+        file_name: file.name,
+        file_url: fileUrl,
+        file_size: file.size
+      };
+
+      const docResponse = await fetch(`${this.supabaseUrl}/rest/v1/documents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.session.access_token}`,
+          'apikey': this.supabaseKey,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(documentData)
+      });
+
+      if (!docResponse.ok) {
+        throw new Error('Failed to save document metadata');
+      }
+
+      return await docResponse.json();
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      throw error;
     }
   }
 
@@ -219,6 +336,16 @@ class PopupController {
       if (dateInput) {
         dateInput.value = new Date().toISOString().split('T')[0];
       }
+      
+      // Reset file input displays
+      const fileInputs = ['resume', 'cover_letter', 'portfolio'];
+      fileInputs.forEach(inputId => {
+        const fileName = document.getElementById(`${inputId}-name`);
+        if (fileName) {
+          fileName.textContent = 'No file chosen';
+          fileName.classList.remove('has-file');
+        }
+      });
       
       // Hide detected info
       const detectedInfo = document.getElementById('detected-info');

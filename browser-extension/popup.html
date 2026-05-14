@@ -216,6 +216,59 @@
     .hidden {
       display: none;
     }
+
+    .document-upload-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .document-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .file-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .file-label svg {
+      color: #667eea;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-name {
+      font-size: 12px;
+      color: #6b7280;
+      padding: 8px 12px;
+      background: #f3f4f6;
+      border-radius: 4px;
+      border: 1px dashed #d1d5db;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .file-name:hover {
+      border-color: #667eea;
+      background: #f9fafb;
+    }
+
+    .file-name.has-file {
+      color: #059669;
+      border-color: #10b981;
+      background: #d1fae5;
+      border-style: solid;
+    }
   </style>
 </head>
 <body>
@@ -280,6 +333,47 @@
         <div class="form-group">
           <label for="notes">Notes</label>
           <textarea id="notes" name="notes" placeholder="Add any additional notes..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Documents (Optional)</label>
+          <div class="document-upload-section">
+            <div class="document-item">
+              <label for="resume" class="file-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Resume/CV
+              </label>
+              <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" class="file-input">
+              <span class="file-name" id="resume-name">No file chosen</span>
+            </div>
+
+            <div class="document-item">
+              <label for="cover_letter" class="file-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Cover Letter
+              </label>
+              <input type="file" id="cover_letter" name="cover_letter" accept=".pdf,.doc,.docx" class="file-input">
+              <span class="file-name" id="cover_letter-name">No file chosen</span>
+            </div>
+
+            <div class="document-item">
+              <label for="portfolio" class="file-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Portfolio/Other
+              </label>
+              <input type="file" id="portfolio" name="portfolio" accept=".pdf,.doc,.docx" class="file-input">
+              <span class="file-name" id="portfolio-name">No file chosen</span>
+            </div>
+          </div>
         </div>
 
         <div class="button-group">
