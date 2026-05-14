@@ -54,6 +54,28 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchApplications()
+    
+    // Check for URL parameters from extension
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('source') === 'extension') {
+      // Pre-fill form with data from extension
+      const extensionData = {
+        company_name: urlParams.get('company') || '',
+        position_title: urlParams.get('position') || '',
+        application_date: urlParams.get('date') || new Date().toISOString().split('T')[0],
+        application_method: urlParams.get('method') || '',
+        job_posting_url: urlParams.get('url') || '',
+        notes: urlParams.get('notes') || '',
+        response_status: 'pending',
+        final_outcome: 'in_progress'
+      }
+      
+      setFormData(extensionData)
+      setShowAddModal(true)
+      
+      // Clean URL after reading parameters
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
   }, [])
 
   useEffect(() => {

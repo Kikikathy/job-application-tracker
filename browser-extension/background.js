@@ -12,6 +12,14 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'openTrackerTab') {
+    // Open the Job Application Tracker in a new tab
+    chrome.tabs.create({ url: request.url }, (tab) => {
+      sendResponse({ success: true, tabId: tab.id });
+    });
+    return true; // Keep the message channel open for async response
+  }
+  
   if (request.action === 'saveCredentials') {
     // Save Supabase credentials
     chrome.storage.sync.set({

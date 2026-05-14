@@ -232,25 +232,36 @@ class JobApplicationDetector {
   }
 
   openTrackerPopup() {
-    // Store the job data for the popup to access
-    chrome.storage.local.set({
-      pendingApplication: {
-        ...this.jobData,
-        timestamp: Date.now()
-      }
-    }, () => {
-      // Show notification to click extension icon
-      this.showClickExtensionNotification();
+    // Encode job data as URL parameters
+    const params = new URLSearchParams({
+      company: this.jobData.company_name || '',
+      position: this.jobData.position_title || '',
+      url: this.jobData.job_posting_url || '',
+      method: this.jobData.application_method || '',
+      date: this.jobData.application_date || '',
+      notes: this.jobData.notes || '',
+      source: 'extension'
     });
+
+    // Open the Job Application Tracker web app with pre-filled data
+    const trackerUrl = `https://job-application-tracker-two-xi.vercel.app/?${params.toString()}`;
+    
+    chrome.runtime.sendMessage({
+      action: 'openTrackerTab',
+      url: trackerUrl
+    });
+
+    // Show success notification
+    this.showJobSavedNotification();
   }
 
-  showClickExtensionNotification() {
+  showJobSavedNotification() {
     // Remove any existing notification
-    const existing = document.getElementById('job-tracker-click-notification');
+    const existing = document.getElementById('job-tracker-notification');
     if (existing) existing.remove();
 
     const notification = document.createElement('div');
-    notification.id = 'job-tracker-click-notification';
+    notification.id = 'job-tracker-notification';
     notification.className = 'job-tracker-notification';
     notification.innerHTML = `
       <div class="notification-content">
@@ -259,8 +270,8 @@ class JobApplicationDetector {
           <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
         <div>
-          <strong>Job Data Saved!</strong>
-          <p>Click the extension icon 🎯 in your toolbar to complete tracking</p>
+          <strong>Opening Job Tracker...</strong>
+          <p>Job details will be pre-filled for you</p>
         </div>
         <button class="close-btn">✕</button>
       </div>
@@ -273,13 +284,13 @@ class JobApplicationDetector {
       setTimeout(() => notification.remove(), 300);
     });
 
-    // Auto-hide after 10 seconds
+    // Auto-hide after 5 seconds
     setTimeout(() => {
       if (notification.parentElement) {
         notification.classList.add('fade-out');
         setTimeout(() => notification.remove(), 300);
       }
-    }, 10000);
+    }, 5000);
   }
 
   monitorFormSubmissions() {
