@@ -396,24 +396,28 @@ class JobApplicationDetector {
     const trackerUrl = `https://job-application-tracker-two-xi.vercel.app/?${params.toString()}`;
     console.log('🎯 Job Tracker: Opening URL:', trackerUrl);
     
-    // Try to send message to background script
+    // Open directly using window.open (most reliable method)
     try {
-      chrome.runtime.sendMessage({
-        action: 'openTrackerTab',
-        url: trackerUrl
-      }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.error('🎯 Job Tracker: Error sending message:', chrome.runtime.lastError);
-          // Fallback: open directly
-          window.open(trackerUrl, '_blank');
-        } else {
-          console.log('🎯 Job Tracker: Message response:', response);
-        }
-      });
+      const newTab = window.open(trackerUrl, '_blank');
+      if (newTab) {
+        console.log('🎯 Job Tracker: Tab opened successfully via window.open');
+        newTab.focus();
+      } else {
+        console.error('🎯 Job Tracker: window.open returned null - popup might be blocked');
+        // Try via background script as fallback
+        chrome.runtime.sendMessage({
+          action: 'openTrackerTab',
+          url: trackerUrl
+        }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('🎯 Job Tracker: Error sending message:', chrome.runtime.lastError);
+          } else {
+            console.log('🎯 Job Tracker: Message response:', response);
+          }
+        });
+      }
     } catch (error) {
-      console.error('🎯 Job Tracker: Exception sending message:', error);
-      // Fallback: open directly
-      window.open(trackerUrl, '_blank');
+      console.error('🎯 Job Tracker: Exception opening tab:', error);
     }
 
     // Show success notification
