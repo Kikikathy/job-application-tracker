@@ -16,14 +16,30 @@ chrome.runtime.onInstalled.addListener((details) => {
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('🎯 Job Tracker Background: Message received', request);
+  console.log('🎯 Job Tracker Background: Sender:', sender);
   
   if (request.action === 'openTrackerTab') {
     console.log('🎯 Job Tracker Background: Opening tracker tab with URL:', request.url);
-    // Open the Job Application Tracker in a new tab
-    chrome.tabs.create({ url: request.url }, (tab) => {
-      console.log('🎯 Job Tracker Background: Tab created', tab.id);
-      sendResponse({ success: true, tabId: tab.id });
-    });
+    
+    try {
+      // Open the Job Application Tracker in a new tab
+      chrome.tabs.create({
+        url: request.url,
+        active: true // Make sure the tab is focused
+      }, (tab) => {
+        if (chrome.runtime.lastError) {
+          console.error('🎯 Job Tracker Background: Error creating tab:', chrome.runtime.lastError);
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          console.log('🎯 Job Tracker Background: Tab created successfully', tab.id);
+          sendResponse({ success: true, tabId: tab.id });
+        }
+      });
+    } catch (error) {
+      console.error('🎯 Job Tracker Background: Exception creating tab:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+    
     return true; // Keep the message channel open for async response
   }
   

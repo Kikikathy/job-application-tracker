@@ -323,6 +323,10 @@ class JobApplicationDetector {
     console.log('🎯 Job Tracker: openTrackerPopup called');
     console.log('🎯 Job Tracker: Current job data:', this.jobData);
     
+    // Re-extract data to ensure we have the latest
+    this.extractJobData();
+    console.log('🎯 Job Tracker: Re-extracted job data:', this.jobData);
+    
     // Encode job data as URL parameters
     const params = new URLSearchParams({
       company: this.jobData.company_name || '',
@@ -338,12 +342,25 @@ class JobApplicationDetector {
     const trackerUrl = `https://job-application-tracker-two-xi.vercel.app/?${params.toString()}`;
     console.log('🎯 Job Tracker: Opening URL:', trackerUrl);
     
-    chrome.runtime.sendMessage({
-      action: 'openTrackerTab',
-      url: trackerUrl
-    }, (response) => {
-      console.log('🎯 Job Tracker: Message response:', response);
-    });
+    // Try to send message to background script
+    try {
+      chrome.runtime.sendMessage({
+        action: 'openTrackerTab',
+        url: trackerUrl
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('🎯 Job Tracker: Error sending message:', chrome.runtime.lastError);
+          // Fallback: open directly
+          window.open(trackerUrl, '_blank');
+        } else {
+          console.log('🎯 Job Tracker: Message response:', response);
+        }
+      });
+    } catch (error) {
+      console.error('🎯 Job Tracker: Exception sending message:', error);
+      // Fallback: open directly
+      window.open(trackerUrl, '_blank');
+    }
 
     // Show success notification
     this.showJobSavedNotification();
