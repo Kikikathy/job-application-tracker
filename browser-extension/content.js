@@ -149,51 +149,217 @@ class JobApplicationDetector {
   }
 
   extractCompanyName() {
-    const selectors = [
-      // LinkedIn (updated 2024+ selectors)
-      '.job-details-jobs-unified-top-card__company-name',
-      '.jobs-unified-top-card__company-name',
-      '.job-details-jobs-unified-top-card__primary-description a',
-      '.jobs-unified-top-card__subtitle-primary-grouping a',
-      'a.app-aware-link[href*="/company/"]',
-      '.top-card-layout__entity-info-container .app-aware-link',
-      '.topcard__org-name-link',
-      // Indeed
-      '[data-company-name]',
-      '.jobsearch-InlineCompanyRating-companyHeader',
-      '.icl-u-lg-mr--sm',
-      '[data-testid="inlineHeader-companyName"]',
-      // Glassdoor
-      '.employer-name',
-      '[data-test="employer-name"]',
-      // BrighterMonday & African job boards
-      '.company-name',
-      '.employer-name',
-      '.company',
-      '[class*="company"]',
-      '[class*="employer"]',
-      '[class*="organization"]',
-      // Generic
-      '[itemprop="hiringOrganization"]',
-      '.employer',
-      'meta[property="og:site_name"]'
-    ];
-
+    const platform = this.detectPlatform();
+    console.log('🎯 Job Tracker: Extracting company name for platform:', platform);
+    
+    // Platform-specific extraction with priority order
+    let companyName = '';
+    
+    // LinkedIn - most specific selectors first
+    if (platform === 'LinkedIn') {
+      const linkedInSelectors = [
+        '.job-details-jobs-unified-top-card__company-name a',
+        '.jobs-unified-top-card__company-name a',
+        '.job-details-jobs-unified-top-card__company-name',
+        '.jobs-unified-top-card__company-name',
+        '.jobs-unified-top-card__subtitle-primary-grouping a',
+        'a.app-aware-link[href*="/company/"]',
+        '.top-card-layout__entity-info-container a[href*="/company/"]'
+      ];
+      companyName = this.trySelectors(linkedInSelectors);
+    }
+    
+    // Indeed
+    else if (platform === 'Indeed') {
+      const indeedSelectors = [
+        '[data-company-name="true"]',
+        '[data-testid="inlineHeader-companyName"] a',
+        '[data-testid="inlineHeader-companyName"]',
+        '.jobsearch-InlineCompanyRating-companyHeader a',
+        '.jobsearch-InlineCompanyRating-companyHeader',
+        '.icl-u-lg-mr--sm.icl-u-xs-mr--xs'
+      ];
+      companyName = this.trySelectors(indeedSelectors);
+    }
+    
+    // Glassdoor
+    else if (platform === 'Glassdoor') {
+      const glassdoorSelectors = [
+        '[data-test="employer-name"]',
+        '.employer-name',
+        '[data-test="employerName"]'
+      ];
+      companyName = this.trySelectors(glassdoorSelectors);
+    }
+    
+    // BrighterMonday & African job boards
+    else if (['BrighterMonday', 'Fuzu', 'MyJobMag', 'Jobberman'].includes(platform)) {
+      const africanSelectors = [
+        '.company-name a',
+        '.company-name',
+        '.employer-name',
+        '[class*="company-name"]',
+        '[class*="employer"]'
+      ];
+      companyName = this.trySelectors(africanSelectors);
+    }
+    
+    // Greenhouse, Lever, Workday (ATS platforms)
+    else if (['Greenhouse', 'Lever', 'Workday', 'SmartRecruiters', 'iCIMS'].includes(platform)) {
+      const atsSelectors = [
+        '[class*="company-name"]',
+        '[class*="company"]',
+        'a[href*="/company"]',
+        '.company',
+        '[data-qa="company-name"]'
+      ];
+      companyName = this.trySelectors(atsSelectors);
+    }
+    
+    // If platform-specific extraction failed, try generic selectors
+    if (!companyName) {
+      console.log('🎯 Job Tracker: Platform-specific extraction failed, trying generic selectors');
+      const genericSelectors = [
+        // Structured data
+        '[itemprop="hiringOrganization"] [itemprop="name"]',
+        '[itemprop="hiringOrganization"]',
+        // Common class patterns (more specific first)
+        '.company-name',
+        '.employer-name',
+        '.organization-name',
+        // Links to company pages
+        'a[href*="/company/"]',
+        'a[href*="/companies/"]',
+        'a[href*="/employer/"]',
+        // Meta tags
+        'meta[property="og:site_name"]',
+        'meta[name="author"]'
+      ];
+      companyName = this.trySelectors(genericSelectors);
+    }
+    
+    // Try to extract from page title as last resort
+    if (!companyName) {
+      console.log('🎯 Job Tracker: Trying to extract from page title');
+      companyName = this.extractCompanyFromTitle();
+    }
+    
+    // Validate and clean the extracted company name
+    if (companyName) {
+      companyName = this.cleanCompanyName(companyName);
+      console.log('🎯 Job Tracker: Final company name:', companyName);
+    } else {
+      console.log('🎯 Job Tracker: Could not extract company name');
+    }
+    
+    return companyName;
+  }
+  
+  trySelectors(selectors) {
     for (const selector of selectors) {
-      const element = document.querySelector(selector);
-      if (element) {
-        const text = element.getAttribute('content') || element.textContent;
-        if (text && text.trim() && !text.includes('http') && text.length < 100) {
-          return text.trim();
+      try {
+        const element = document.querySelector(selector);
+        if (element) {
+          // Try getting content from different sources
+          let text = element.getAttribute('content') ||
+                     element.getAttribute('data-company-name') ||
+                     element.textContent;
+          
+          if (text) {
+            text = text.trim();
+            // Validate the extracted text
+            if (this.isValidCompanyName(text)) {
+              console.log('🎯 Job Tracker: Found company via selector:', selector, '→', text);
+              return text;
+            }
+          }
         }
+      } catch (e) {
+        console.warn('🎯 Job Tracker: Error with selector:', selector, e);
       }
     }
-
-    // Try to extract from page title
+    return '';
+  }
+  
+  isValidCompanyName(text) {
+    if (!text || text.length < 2) return false;
+    if (text.length > 100) return false;
+    
+    // Reject if it looks like a URL
+    if (text.includes('http://') || text.includes('https://') || text.includes('www.')) return false;
+    
+    // Reject common non-company text
+    const invalidPatterns = [
+      /^(search|browse|find|apply|jobs?|career|position|role|vacancy|opportunities)$/i,
+      /^(home|about|contact|login|sign in|register)$/i,
+      /^\d+$/,  // Just numbers
+      /^[^a-zA-Z0-9]+$/,  // No alphanumeric characters
+    ];
+    
+    for (const pattern of invalidPatterns) {
+      if (pattern.test(text)) {
+        console.log('🎯 Job Tracker: Rejected invalid company name:', text);
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  cleanCompanyName(name) {
+    // Remove common suffixes and prefixes
+    name = name.trim();
+    
+    // Remove "at" prefix (e.g., "at Google" → "Google")
+    name = name.replace(/^at\s+/i, '');
+    
+    // Remove trailing " - Jobs" or similar
+    name = name.replace(/\s*[-–—|]\s*(jobs?|careers?|hiring|opportunities).*$/i, '');
+    
+    // Remove "Careers" or "Jobs" suffix
+    name = name.replace(/\s+(careers?|jobs?)$/i, '');
+    
+    // Remove extra whitespace
+    name = name.replace(/\s+/g, ' ').trim();
+    
+    // Remove quotes if they wrap the entire name
+    if ((name.startsWith('"') && name.endsWith('"')) ||
+        (name.startsWith("'") && name.endsWith("'"))) {
+      name = name.slice(1, -1).trim();
+    }
+    
+    return name;
+  }
+  
+  extractCompanyFromTitle() {
     const title = document.title;
-    const match = title.match(/at\s+([^|•\-]+)/i) || title.match(/\|\s*([^|•\-]+)$/);
-    if (match) return match[1].trim();
-
+    
+    // Try pattern: "Position at Company | ..."
+    let match = title.match(/\bat\s+([^|•\-–—]+)/i);
+    if (match && this.isValidCompanyName(match[1].trim())) {
+      return match[1].trim();
+    }
+    
+    // Try pattern: "Position | Company"
+    match = title.match(/[|•\-–—]\s*([^|•\-–—]+?)(?:\s*[|•\-–—]|$)/);
+    if (match && this.isValidCompanyName(match[1].trim())) {
+      const candidate = match[1].trim();
+      // Make sure it's not the position title (usually comes first)
+      if (!title.toLowerCase().startsWith(candidate.toLowerCase())) {
+        return candidate;
+      }
+    }
+    
+    // Try pattern: "Company - Position"
+    match = title.match(/^([^|•\-–—]+?)\s*[-–—]\s*/);
+    if (match && this.isValidCompanyName(match[1].trim())) {
+      const candidate = match[1].trim();
+      // Verify it looks more like a company than a position
+      if (!/\b(engineer|developer|manager|analyst|designer|specialist)\b/i.test(candidate)) {
+        return candidate;
+      }
+    }
+    
     return '';
   }
 

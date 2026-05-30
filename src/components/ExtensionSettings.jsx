@@ -102,7 +102,7 @@ export default function ExtensionSettings() {
                 Download the extension files from the repository or use the link below.
               </p>
               <a
-                href="https://github.com/your-repo/job-application-tracker/tree/main/browser-extension"
+                href="https://github.com/Kikikathy/job-application-tracker/releases/latest"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
